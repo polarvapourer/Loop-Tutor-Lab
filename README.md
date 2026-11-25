@@ -4,6 +4,8 @@ I built a small Python experiment to compare how two local AI models teach
 a Java loop. The loop reads binary digits from left to right and updates a
 running total with `total = total * 2 + bit`.
 
+[Download Loop Tutor Lab for Windows](https://github.com/polarvapourer/Loop-Tutor-Lab/releases/download/v1.0.0/LoopTutorLab.exe) — choose `LoopTutorLab.exe` under **Assets**. Requires Ollama with `qwen2.5-coder:3b` and `qwen2.5-coder:7b`.
+
 ## How the experiment works
 
 I used `qwen2.5-coder:3b` and `qwen2.5-coder:7b` through Ollama.
