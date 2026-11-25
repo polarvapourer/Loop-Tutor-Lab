@@ -9,6 +9,7 @@ from http.client import HTTPConnection, HTTPException
 from time import perf_counter
 
 MODELS = ["qwen2.5-coder:3b", "qwen2.5-coder:7b"]
+MAX_REPLY_BYTES = 64 * 1024
 
 
 def java_loop(bits):
@@ -37,7 +38,7 @@ def explanation(model):
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0},
+        "options": {"temperature": 0, "num_predict": 256},
     }
 
     # 127.0.0.1 is this computer. Port 11434 is Ollama's local API port.
@@ -56,9 +57,21 @@ def explanation(model):
                 f"Ollama returned HTTP {reply.status}. Check ollama list."
             )
 
-        data = json.load(reply)
-        answer = data.get("response", "").strip()
-        if not data.get("done") or not answer:
+        raw = reply.read(MAX_REPLY_BYTES + 1)
+        if len(raw) > MAX_REPLY_BYTES:
+            raise ValueError("Ollama returned a reply that was too large.")
+        try:
+            data = json.loads(raw)
+        except RecursionError as error:
+            raise ValueError("Ollama returned excessively nested JSON.") from error
+        if not isinstance(data, dict) or data.get("done") is not True:
+            raise ValueError("Ollama returned an incomplete reply.")
+        answer = data.get("response")
+        if not isinstance(answer, str):
+            raise ValueError("Ollama returned an invalid explanation.")
+        # Preserve the explanation's layout while keeping terminal controls out of the display.
+        answer = "".join(c for c in answer if c.isprintable() or c in "\n\t").strip()
+        if not answer:
             raise ValueError("Ollama returned an incomplete or empty reply.")
 
         return answer
