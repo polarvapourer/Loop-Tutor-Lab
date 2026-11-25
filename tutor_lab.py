@@ -1,3 +1,8 @@
+# @Author: Ibrahim Bashir
+# @Date: 25 November 2026
+# @Version: 1.0.0
+# This program compares how clearly and accurately two local AI models teach beginners to trace a Java loop.
+
 import json
 import random
 from http.client import HTTPConnection, HTTPException
